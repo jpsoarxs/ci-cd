@@ -1,47 +1,51 @@
 pipeline {
     agent any
+
     environment {
-        AWS_ACCOUNT_ID="635101881545"
-        AWS_DEFAULT_REGION="us-west-1"
-        IMAGE_REPO_NAME="express-prod"
-        IMAGE_TAG="latest"
-        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+        AWS_REGION = 'us-east-1'
+        AWS_ACCOUNT_ID = '635101881545'
+        ECR_REPO = 'express-prod'
+        IMAGE_TAG = 'latest'
+        PEM_FILE = credentials('aws-prod-ec2-pem-file')
+        SSH_USER = 'ec2-user'
+        SSH_PORT = '22'
+        EC2_INSTANCE_IP = '54.209.124.70'
     }
-   
+
     stages {
-        
-        stage('Logging into AWS ECR') {
+        stage('Checkout') {
             steps {
-                script {
-                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-                }
-                 
+                checkout scm
             }
         }
-        
-        stage('Cloning Git') {
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/sd031/aws_codebuild_codedeploy_nodeJs_demo.git']]])     
-            }
-        }
-  
-        // Building Docker images
-        stage('Building image') {
+
+        stage('Build Docker image') {
             steps {
                 script {
-                    dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                    docker.build("${ECR_REPO}:${IMAGE_TAG}")
                 }
             }
         }
-    
-        // Uploading Docker images into AWS ECR
-        stage('Pushing to ECR') {
-            steps{  
+
+        stage('Push Docker image to ECR') {
+            steps {
                 script {
-                    sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
-                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                    docker.withRegistry("https://${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com", 'ecr') {
+                        dockerImage.push("${ECR_REPO}:${IMAGE_TAG}")
+                    }
                 }
             }
         }
-     }
+
+        stage('Deploy to EC2') {
+            steps {
+                script {
+                    sshagent(['my-pem-file']) {
+                        def sshCommand = "ssh -o StrictHostKeyChecking=no -i ${PEM_FILE} -p ${SSH_PORT} ${SSH_USER}@${EC2_INSTANCE_IP} docker pull ${ECR_REPO}:${IMAGE_TAG} && docker run -d -p 80:80 ${ECR_REPO}:${IMAGE_TAG}"
+                        sh "echo '${sshCommand}' | ssh -tt ${SSH_USER}@${EC2_INSTANCE_IP} -i ${PEM_FILE} -p ${SSH_PORT}"
+                    }
+                }
+            }
+        }
+    }
 }
