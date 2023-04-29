@@ -59,8 +59,19 @@ pipeline {
             steps {
                 script {
                     sshagent(['AWS']) {
-                        sh "echo 'Deploying to EC2 instance'"
-                        sh "docker ps"
+                        sh "docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest"
+                        sh "docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                script {
+                    sshagent(['aws-prod-ec2-pem-file']) {
+                        def sshCommand = "ssh -o StrictHostKeyChecking=no -i ${PEM_FILE} -p ${SSH_PORT} ${SSH_USER}@${EC2_INSTANCE_IP} docker pull ${ECR_REPO}:${IMAGE_TAG} && docker run -d -p 80:80 ${ECR_REPO}:${IMAGE_TAG}"
+                        sh "echo 'ssh -o StrictHostKeyChecking=no -i ${PEM_FILE} -p ${SSH_PORT} ${SSH_USER}@${EC2_INSTANCE_IP} docker pull ${ECR_REPO}:${IMAGE_TAG} && docker run -d -p 80:80 ${ECR_REPO}:${IMAGE_TAG}' | ssh -tt ${SSH_USER}@${EC2_INSTANCE_IP} -i ${PEM_FILE} -p ${SSH_PORT}")
                     }
                 }
             }
