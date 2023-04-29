@@ -6,7 +6,6 @@ pipeline {
         AWS_ACCOUNT_ID = '635101881545'
         ECR_REPO = 'express-prod'
         IMAGE_TAG = 'latest'
-        PEM_FILE = credentials('aws-prod-ec2-pem-file')
         SSH_USER = 'ec2-user'
         SSH_PORT = '22'
         EC2_INSTANCE_IP = '54.209.124.70'
