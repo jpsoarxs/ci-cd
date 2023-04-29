@@ -58,7 +58,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    sshagent(credentials: ['aws-jenkins-demo']) {
+                    sshagent(credentials: ['ec2-user']) {
                        sh "ssh -t -t -o StrictHostKeyChecking=no ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com"
                     }
                 }
