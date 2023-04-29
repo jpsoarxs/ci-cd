@@ -59,7 +59,7 @@ pipeline {
             steps {
                 script {
                     sshagent(credentials: ['aws-jenkins-demo']) {
-                       sh "ssh -o StrictHostKeyChecking=no ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com"
+                       sh "ssh -t -t -o StrictHostKeyChecking=no ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com"
                     }
                 }
             }
