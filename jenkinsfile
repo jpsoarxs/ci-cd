@@ -58,9 +58,8 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    sshagent(['AWS']) {
-                        sh "docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest"
-                        sh "docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest"
+                    sshagent(['aws-jenkins-demo']) {
+                        sh " ssh ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com"
                     }
                 }
             }
