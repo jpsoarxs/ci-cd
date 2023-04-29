@@ -20,4 +20,4 @@ COPY ./app /app/
 
 RUN npm install
 
-CMD ["pm2-runtime", "pm2.yml"]
+CMD [ "npm", "run", "start:pm2" ]

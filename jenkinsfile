@@ -58,7 +58,8 @@ pipeline {
             steps {
                 sshagent(credentials: ['ec2-user']) {
                      sh '''
-                        ssh -i "~/.ssh/express-aws-prod.pem" ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com
+                        ssh -i "~/.ssh/express-aws-prod.pem" ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com &&
+                        docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
                     '''
                 }
             }
