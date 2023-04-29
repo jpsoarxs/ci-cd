@@ -58,8 +58,8 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    sshagent(['aws-jenkins-demo']) {
-                        sh " ssh ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com"
+                    sshagent(credentials: ['aws-jenkins-demo']) {
+                        sh "mkdir teste"
                     }
                 }
             }
