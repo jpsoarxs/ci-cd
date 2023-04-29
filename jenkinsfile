@@ -58,7 +58,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    sshagent(['aws-prod-ec2-pem-file']) {
+                    sshagent(['AWS']) {
                         sh "echo 'Deploying to EC2 instance'"
                         sh "docker ps"
                     }
