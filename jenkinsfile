@@ -58,6 +58,7 @@ pipeline {
             steps {
                 script {
                     def ssh = [:]
+                    ssh.name = 'Deploy to EC2'
                     ssh.user = 'ec2-user'
                     ssh.identityFile = "~/.ssh/express-aws-prod.pem"
                     ssh.host = 'ec2-54-209-124-70.compute-1.amazonaws.com'
