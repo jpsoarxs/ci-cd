@@ -56,22 +56,13 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                script {
-                    def ssh = [:]
-                    ssh.name = 'Deploy to EC2'
-                    ssh.user = 'ec2-user'
-                    ssh.identityFile = "~/.ssh/express-aws-prod.pem"
-                    ssh.host = 'ec2-54-209-124-70.compute-1.amazonaws.com'
-                    ssh.allowAnyHosts = true
-                    
-                    sshCommand remote: ssh, command: "ls -lrt"
-                    // ssh.withRemote() {
-                    //     sh '''
-                    //         $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 635101881545.dkr.ecr.us-east-1.amazonaws.com)
-                    //         docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
-                    //         docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
-                    //     '''
-                    // }
+                sshagent(credentials: ['ec2-user']) {
+                     sh '''
+                        ssh -i "~/.ssh/express-aws-prod.pem" ec2-user@ec2-54-209-124-70.compute-1.amazonaws.com "
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 635101881545.dkr.ecr.us-east-1.amazonaws.com &&
+                        docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest &&
+                        docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest"
+                    '''
                 }
             }
         }
