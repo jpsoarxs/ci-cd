@@ -63,13 +63,14 @@ pipeline {
                     ssh.host = 'ec2-54-209-124-70.compute-1.amazonaws.com'
                     ssh.allowAnyHosts = true
                     
-                    ssh.withRemote {
-                        sh '''
-                            $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 635101881545.dkr.ecr.us-east-1.amazonaws.com)
-                            docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
-                            docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
-                        '''
-                    }
+                    sshCommand remote: ssh, command: "ls -lrt"
+                    // ssh.withRemote() {
+                    //     sh '''
+                    //         $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 635101881545.dkr.ecr.us-east-1.amazonaws.com)
+                    //         docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
+                    //         docker run -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest
+                    //     '''
+                    // }
                 }
             }
         }
