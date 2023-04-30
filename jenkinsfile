@@ -63,7 +63,7 @@ pipeline {
                         docker stop express &&
                         docker rm express &&
                         docker pull 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest &&
-                        docker run --name express -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest && exit"
+                        docker run -d --name express -p 3000:3000 635101881545.dkr.ecr.us-east-1.amazonaws.com/express-prod:latest && exit"
                     '''
                 }
             }
